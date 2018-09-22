@@ -521,7 +521,8 @@
 
         </div>
         <div class="modal-footer">
-		  <a id="pay" href="" class="btn btn-success">Open in wallet</a>
+		  <button type="button" class="btn btn-primary" id="copyUri">Copy URI</button>
+		  <a id="pay" href="#" class="btn btn-primary">Open in wallet</a>
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>
@@ -577,7 +578,7 @@ var coinUnits = 1000000000000;
 var ticker = 'KRB';
 var defaultNode = 'http://108.61.198.115:32348';
 var block_explorer = "http://explorer.karbowanec.com/?hash=";
-var apiNodeUrl, merchantName, publicAddress, privateViewKey, requiredConfirmations, exchangeRate, fiatCurrency, payment_id, amount_due = 0;
+var apiNodeUrl, merchantName, publicAddress, privateViewKey, requiredConfirmations, exchangeRate, fiatCurrency, PaymentRequest, payment_id, amount_due = 0;
 var current_height = Number.MAX_SAFE_INTEGER;
 var requestOpen = false;
 var paid = false;
@@ -595,7 +596,7 @@ $('#settingsLink').click(function() {
 $('#createRequest').click(function() {
 	createPaymentRequest();
 });
-  
+
 var showSettingsModal = $('#showSettingsModal');
 showSettingsModal.on('show.bs.modal', function(event) {
 	$("#apiNodeUrl").val(apiNodeUrl);
@@ -669,7 +670,7 @@ showRequestModal.on('show.bs.modal', function(event) {
 	$('#request_amount_due').text(getReadableCoins(amount_due));
 	$('#request_needed_confirmations').text(requiredConfirmations);
 	
-	var PaymentRequest = 'karbowanec:'+publicAddress+'?amount='+getReadableCoins(amount_due,12,true)+'&payment_id='+payment_id;
+	PaymentRequest = 'karbowanec:'+publicAddress+'?amount='+getReadableCoins(amount_due,12,true)+'&payment_id='+payment_id;
 	$("#pay").attr("href", PaymentRequest);
 	
 	$("#qrcode").empty();
@@ -681,6 +682,19 @@ showRequestModal.on('show.bs.modal', function(event) {
 	});
 	
 	checkPayment();
+});
+
+$('#copyUri').click(function() {
+	console.log(PaymentRequest);
+	var dummy = document.createElement("input");
+    showRequestModal.append(dummy);
+    $(dummy).val(PaymentRequest);
+	dummy.focus();
+    dummy.select();
+    document.execCommand("copy");
+	$(dummy).css('display','none');
+	dummy.setAttribute("id", "dummy_id");
+	document.getElementById("dummy_id").remove();
 });
 
 function createPaymentRequest() {
