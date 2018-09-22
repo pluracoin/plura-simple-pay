@@ -740,22 +740,6 @@ function init() {
 
 	publicAddress = localStorage.getItem('publicAddress') ? localStorage.getItem('publicAddress') : "";
 	privateViewKey = localStorage.getItem('privateViewKey') ? localStorage.getItem('privateViewKey') : "";
-	
-	function fetchLiveStats() {
-		$.ajax({
-            url: apiNodeUrl + '/getinfo',
-            dataType: 'json',
-			type: 'GET',
-            cache: 'false'
-        }).done(function(data, success){
-            current_height = data.last_known_block_index;		
-        }).always(function () {
-			setTimeout(function() {
-				fetchLiveStats();
-			}, pollingInterval);
-        });
-	}
-	fetchLiveStats();
 }
 
 function formatAmount(amount){
@@ -800,39 +784,18 @@ function setConfirmed(tx_hash, nr_of_confirmations){
 	$("#pay").addClass("disabled");
 }
 
-function getTransactionDetails(id) {
-  $.ajax({
-	url: apiNodeUrl + "/json_rpc",
-	method: "POST",
-	data: JSON.stringify({
-		jsonrpc:"2.0",
-		id: "test",
-		method:"f_transaction_json",
-		params: {
-			hash:id
-		}
-    }),
-    dataType: 'json',
-    cache: 'false',
-    success: function(data){
-			var transaction_height = data.result.block.hash ? parseInt(data.result.block.height) : Number.MAX_SAFE_INTEGER;
-			var confirmations = current_height - transaction_height;		
-			if(current_height < (transaction_height + requiredConfirmations) && underpaid == false) {
-				setReceived(id);
-			}
-			if(current_height >= (transaction_height + requiredConfirmations) && paid == true) {
-				setConfirmed(id);
-			}
-			$("#confirmed").text(data.result.block.hash ? confirmations : 0);		
-	},
-	error: function (request, status, error) {
-			console.log(request.responseText);
-		}
-  });
+function setTransactionStatus(id, confirmations) {
+	if(confirmations < requiredConfirmations && underpaid == false) {
+		setReceived(id);
+	}
+	if(confirmations >= requiredConfirmations && paid == true) {
+		setConfirmed(id);
+	}
+	$("#confirmed").text(confirmations);
 }
 
 function contains(arr, obj) {
-  const stringifiedObj = JSON.stringify(obj); // Cache our object to not call `JSON.stringify` on every iteration
+  const stringifiedObj = JSON.stringify(obj);
   return arr.some(item => JSON.stringify(item) === stringifiedObj);
 }
 
@@ -859,7 +822,7 @@ function getTransaction(id) {
 		}
 		if (data.result.amount >= amount_due) {
 			paid = true;
-			getTransactionDetails(id);
+			setTransactionStatus(id, data.result.confirmations);
 		} else {
 			if (!contains(payingTransactions, id)) {
 				underpaid = true;
@@ -869,7 +832,7 @@ function getTransaction(id) {
 				if (amount_received >= amount_due) {
 					paid = true;
 				}
-				getTransactionDetails(payingTransactions[payingTransactions.length - 1]);
+				setTransactionStatus(data.result.confirmations);
 			}
 		}
 	},
