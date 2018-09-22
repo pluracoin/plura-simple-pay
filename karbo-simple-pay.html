@@ -816,20 +816,14 @@ function getTransactionDetails(id) {
     cache: 'false',
     success: function(data){
 			var transaction_height = data.result.block.hash ? parseInt(data.result.block.height) : Number.MAX_SAFE_INTEGER;
-
-			var confirmations = current_height - transaction_height;
-			
+			var confirmations = current_height - transaction_height;		
 			if(current_height < (transaction_height + requiredConfirmations) && underpaid == false) {
 				setReceived(id);
-				console.log("setReceived");
 			}
 			if(current_height >= (transaction_height + requiredConfirmations) && paid == true) {
 				setConfirmed(id);
-				console.log("setConfirmed");
 			}
-
-			$("#confirmed").text(data.result.block.hash ? confirmations : 0);
-		
+			$("#confirmed").text(data.result.block.hash ? confirmations : 0);		
 	},
 	error: function (request, status, error) {
 			console.log(request.responseText);
