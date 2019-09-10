@@ -1,7 +1,6 @@
-# karbo-simple-pay
-Simle Payment Gateway via Karbo masternodes' Decentralized API
+#Simple Payment Gateway via PluraCoin masternodes' Decentralized API
 
-It can check payment via any Karbo masternode starting of version v.1.5.8.
+It can check payment via any PLURA masternode starting of version v.1.5.8.
 Required JSON RPC methods: `get_transaction_hashes_by_payment_id` and `check_tx_with_view_key`. 
 
 ## How to use
